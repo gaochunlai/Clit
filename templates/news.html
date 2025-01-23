@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻聚合</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav-sites {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .site-nav-item {
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 15px;
+            background: #f0f0f0;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        .site-nav-item:hover {
+            background: #3498db;
+            color: white;
+        }
+        .site-nav-item.active {
+            background: #2980b9;
+            color: white;
+        }
+        .site-section {
+            margin-bottom: 30px;
+            display: none; /* 默认隐藏所有版块 */
+        }
+        .site-section.active {
+            display: block; /* 显示激活的版块 */
+        }
+        .site-title {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .news-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .news-title {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        .news-title:hover {
+            color: #3498db;
+        }
+        .news-time {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="nav-sites">
+        <div class="site-nav-item active" data-site="all">全部</div>
+        {{range $site, $articles := .}}
+        <div class="site-nav-item" data-site="{{$site}}">{{$site}}</div>
+        {{end}}
+    </div>
+
+    <!-- 修改新闻内容部分的容器 -->
+    <div id="news-container">
+        {{range $site, $articles := .}}
+        <div class="site-section" data-site="{{$site}}">
+            <h2 class="site-title">{{$site}}</h2>
+            {{range $article := $articles}}
+            <div class="news-item">
+                <a href="{{$article.URL}}" target="_blank" class="news-title">{{$article.Title}}</a>
+                <span class="news-time">{{$article.Time}}</span>
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.site-nav-item');
+            const sections = document.querySelectorAll('.site-section');
+            const container = document.getElementById('news-container');
+            
+            // 初始状态显示所有内容
+            sections.forEach(section => section.style.display = 'block');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有激活状态
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // 添加当前项的激活状态
+                    this.classList.add('active');
+                    
+                    const selectedSite = this.getAttribute('data-site');
+                    
+                    if (selectedSite === 'all') {
+                        // 显示所有内容
+                        sections.forEach(section => section.style.display = 'block');
+                    } else {
+                        // 隐藏所有sections
+                        sections.forEach(section => {
+                            if (section.getAttribute('data-site') === selectedSite) {
+                                // 将选中的section移动到容器的最前面
+                                container.insertBefore(section, container.firstChild);
+                                section.style.display = 'block';
+                            } else {
+                                section.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    // 平滑滚动到顶部
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
